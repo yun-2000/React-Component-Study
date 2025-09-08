@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function App() {
   return (
@@ -9,23 +9,48 @@ export default function App() {
 }
 
 function Counter() {
-  const [counter, setCounter] = useState(0);
-  function addCounter() {
-    setCounter(counter + 1);
-  }
-  function minuesCounter() {
-    setCounter(counter - 1);
-  }
+  const { counter, increment, decrement } = useCounter(0);
   return (
-    // center the counter vertically and horizontally using Tailwind CSS classes, full height screen
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <p>{counter}</p>
-      <div>
-        <button className="border-2" onClick={() => addCounter()}>
+    <div className="flex flex-col items-center justify-center min-h-screen space-y-10 text-center">
+      <p className="min-w-3xs min-h-50 leading-50 text-7xl bg-gray-400 rounded-3xl">
+        {counter}
+      </p>
+      <div className="flex space-x-15">
+        <button
+          className="border-2 bg-green-500 min-w-25 rounded-2xl"
+          onClick={increment}
+        >
           +
         </button>
-        <button onClick={() => minuesCounter()}>-</button>
+        <button
+          className="border-2 bg-red-500 min-w-25 rounded-2xl"
+          onClick={decrement}
+        >
+          -
+        </button>
       </div>
     </div>
   );
+}
+
+function useCounter({ initValue = 0 }) {
+  const [counter, setCounter] = useState(() => {
+    return Number(localStorage.getItem("counter")) || initValue;
+  });
+  const isFirstRender = useRef(true);
+  function increment() {
+    return setCounter((c) => c + 1);
+  }
+  function decrement() {
+    return setCounter((c) => c - 1);
+  }
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    localStorage.setItem("counter", counter);
+  }, [counter]);
+
+  return { counter, increment, decrement };
 }
