@@ -1,8 +1,8 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import reactLogo from "./assets/react.svg";
-import caretDown from "./assets/caret-down.svg";
-import caretUp from "./assets/caret-up.svg";
 import { FacebookIcon, GoogleIcon } from "./assets/Custom_icons";
+import SelectModeDropdownList from "./SelectModeDropdownList";
+import Modal from "./Modal";
 
 export default function App() {
   return (
@@ -21,6 +21,8 @@ function LoginForm() {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
 
   const [light, setLight] = useState(true);
+
+  const [showForgetPasswordModal, setShowForgetPasswordModal] = useState(false);
 
   let isValid = true;
   function handleSubmit() {
@@ -51,6 +53,11 @@ function LoginForm() {
       }`}
     >
       <SelectModeDropdownList light={light} onSetLight={setLight} />
+      <Modal
+        isOpen={showForgetPasswordModal}
+        onSetIsOpen={setShowForgetPasswordModal}
+      />
+
       <div className="flex justify-center items-center">
         <form
           onSubmit={(e) => {
@@ -70,7 +77,7 @@ function LoginForm() {
           <div className="flex flex-col space-y-1 space-x-2 ">
             <label className="w-24">Username</label>
             <input
-              type="text "
+              type="text"
               className="border-1 border-gray-300 bg-gray-50 rounded-xl flex-1 px-3 py-2 focus:outline-0 dark:text-slate-900"
               onChange={(e) => setUsername(e.target.value)}
               value={username}
@@ -84,7 +91,7 @@ function LoginForm() {
             <label>Password</label>
             <input
               type="password"
-              className="border-1 border-gray-300 bg-gray-50 rounded-xl px-3 py-2 focus: outline-0 dark:text-slate-900"
+              className="border-1 border-gray-300 bg-gray-50 rounded-xl px-3 py-2 focus:outline-0 dark:text-slate-900"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••"
@@ -97,7 +104,7 @@ function LoginForm() {
           </div>
           <div className="flex items-center space-x-2">
             <input type="checkbox" className="min-w-3.5 min-h-3.5" />
-            <label className="text-sm tracking-wide">Remeber me</label>
+            <label className="text-sm tracking-wide">Remember me</label>
           </div>
           <div className="flex flex-col justify-center space-y-3">
             <button
@@ -107,7 +114,10 @@ function LoginForm() {
             >
               Sign in
             </button>
-            <button className="underline underline-offset-4 decoration-gray-300 cursor-pointer text-sm hover:opacity-60">
+            <button
+              className="underline underline-offset-4 decoration-gray-300 cursor-pointer text-sm hover:opacity-60"
+              onClick={() => setShowForgetPasswordModal(true)}
+            >
               Forgot your password?
             </button>
           </div>
@@ -135,51 +145,6 @@ function LoginForm() {
             </div>
           </div>
         </form>
-      </div>
-    </div>
-  );
-}
-function SelectModeDropdownList({ light, onSetLight }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="w-full flex justify-end">
-      <div className="relative">
-        <button
-          type="button"
-          className="min-w-23 border-1 cursor-pointer px-3 py-1 flex space-x-6 text-gray-500 rounded-sm mt-5 mr-10"
-          onClick={() => setOpen(!open)}
-        >
-          <span>{light ? "Light" : "Dark "}</span>
-          <img src={open ? caretUp : caretDown} className="w-4" />
-        </button>
-        {open && (
-          <ul
-            className={`absolute mt-0.5 ml-1 min-w-23 bg-white border-1 border-gray-300 p-1 rounded-sm flex flex-col space-y-2`}
-          >
-            <li
-              className={`cursor-pointer py-2 text-center rounded-sm ${
-                light && "bg-gray-200"
-              }`}
-              onClick={() => {
-                onSetLight(true);
-                setOpen(false);
-              }}
-            >
-              Light
-            </li>
-            <li
-              className={`cursor-pointer py-2 text-center rounded-sm ${
-                !light && "bg-gray-200"
-              }`}
-              onClick={() => {
-                onSetLight(false);
-                setOpen(false);
-              }}
-            >
-              Dark
-            </li>
-          </ul>
-        )}
       </div>
     </div>
   );
