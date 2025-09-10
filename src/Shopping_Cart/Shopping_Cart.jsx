@@ -1,4 +1,4 @@
-import { act, useReducer, useState } from "react";
+import { act, useReducer, useMemo } from "react";
 
 const cart = [
   { category: "Fruits", price: "$1", stocked: true, name: "Apple" },
@@ -34,7 +34,7 @@ function reducer(state, action) {
 }
 const initState = {
   filterText: "",
-  inStaockOnly: false
+  inStockOnly: false
 };
 function FilterableProductTable({ products }) {
   const [state, dispatch] = useReducer(reducer, initState);
@@ -59,19 +59,24 @@ function FilterableProductTable({ products }) {
 }
 
 function ProductTable({ products, filterText, inStockOnly }) {
-  let lastCategory = null;
-  const rows = [];
-  products.forEach((product) => {
-    if (product.name.toLowerCase().indexOf(filterText.toLowerCase())) return;
-    if (inStockOnly && !product.stocked) return;
-    if (product.category !== lastCategory) {
-      rows.push(
-        <ProductTableCategoryRow product={product} key={product.category} />
-      );
-    }
-    rows.push(<ProductRow product={product} key={product.name} />);
-    lastCategory = product.category;
-  });
+  const ROWS = useMemo(() => {
+    let lastCategory = null;
+    const rows = [];
+    products.forEach((product) => {
+      if (product.name.toLowerCase().indexOf(filterText.toLowerCase()) === -1)
+        return;
+      if (inStockOnly && !product.stocked) return;
+      if (product.category !== lastCategory) {
+        rows.push(
+          <ProductTableCategoryRow product={product} key={product.category} />
+        );
+      }
+      rows.push(<ProductRow product={product} key={product.name} />);
+      lastCategory = product.category;
+    });
+    console.log("Recomputing");
+    return rows;
+  }, [products, filterText, inStockOnly]);
   return (
     <table>
       <thead>
@@ -80,7 +85,7 @@ function ProductTable({ products, filterText, inStockOnly }) {
           <th>Price</th>
         </tr>
       </thead>
-      <tbody>{rows}</tbody>
+      <tbody>{ROWS}</tbody>
     </table>
   );
 }
