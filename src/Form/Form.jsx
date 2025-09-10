@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { FacebookIcon, GoogleIcon } from "./assets/Custom_icons";
 import SelectModeDropdownList from "./SelectModeDropdownList";
@@ -11,54 +11,136 @@ export default function App() {
     </div>
   );
 }
-function LoginForm() {
-  const [username, setUsername] = useState("");
-  const [usernameError, setUsernameError] = useState(false);
-  const [usenameErrorMessage, setUsernameErrorMessage] = useState("");
-
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-
-  const [light, setLight] = useState(true);
-
-  const [showForgetPasswordModal, setShowForgetPasswordModal] = useState(false);
-
-  let isValid = true;
-  function handleSubmit() {
-    if (!username || !/\S+@\S+\.\S+/.test(username)) {
-      setUsernameError(true);
-      setUsernameErrorMessage("Please enter a valid email address.");
-      isValid = false;
-    } else {
-      setUsernameError(false);
-      setUsernameErrorMessage("");
-      isValid = true;
+// reducer for LoginForm state
+function reducer(state, action) {
+  switch (action.type) {
+    case "SET_USERNAME": {
+      return {
+        ...state,
+        username: action.payload
+      };
     }
-    if (!password) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
-      isValid = true;
+    case "SET_USERNAME_ERROR": {
+      return {
+        ...state,
+        usernameError: action.payload
+      };
+    }
+    case "SET_USERNAME_ERROR_MESSAGE": {
+      return {
+        ...state,
+        usernameErrorMessage: action.payload
+      };
+    }
+    case "SET_PASSWORD": {
+      return {
+        ...state,
+        password: action.payload
+      };
+    }
+    case "SET_PASSWORD_ERROR": {
+      return {
+        ...state,
+        passwordError: action.payload
+      };
+    }
+    case "SET_PASSWORD_ERROR_MESSAGE": {
+      return {
+        ...state,
+        passwordErrorMessage: action.payload
+      };
+    }
+    case "SET_LIGHT": {
+      return { ...state, light: action.payload };
+    }
+    case "SET_MODAL": {
+      return { ...state, showForgetPasswordModal: action.payload };
+    }
+    default: {
+      return state;
     }
   }
+}
+
+const initialFormState = {
+  username: "",
+  usernameError: false,
+  usenameErrorMessage: "",
+  password: "",
+  passwordError: false,
+  passwordErrorMessage: "",
+  light: true,
+  showForgetPasswordModal: false
+};
+let isValid = true;
+function handleSubmit(state, dispatch) {
+  if (!state.username || !/\S+@\S+\.\S+/.test(state.username)) {
+    dispatch({
+      type: "SET_USERNAME_ERROR",
+      payload: true
+    });
+    dispatch({
+      type: "SET_USERNAME_ERROR_MESSAGE",
+      payload: "Please enter a valid username"
+    });
+    isValid = false;
+  } else {
+    dispatch({
+      type: "SET_USERNAME_ERROR",
+      payload: false
+    });
+    dispatch({
+      type: "SET_USERNAME_ERROR_MESSAGE",
+      payload: ""
+    });
+    isValid = true;
+  }
+  if (!state.password) {
+    dispatch({
+      type: "SET_PASSWORD_ERROR",
+      payload: true
+    });
+    dispatch({
+      type: "SET_PASSWORD_ERROR_MESSAGE",
+      payload: "Password must be at least 6 characters long."
+    });
+    isValid = false;
+  } else {
+    dispatch({
+      type: "SET_PASSWORD_ERROR",
+      payload: false
+    });
+    dispatch({
+      type: "SET_PASSWORD_ERROR_MESSAGE",
+      payload: ""
+    });
+    isValid = true;
+  }
+}
+
+function LoginForm() {
+  const [state, dispatch] = useReducer(reducer, initialFormState);
 
   return (
     <div
       className={`min-h-screen flex flex-col bg-gray-100 dark:bg-slate-700 ${
-        !light && "dark"
+        !state.light && "dark"
       }`}
     >
-      <SelectModeDropdownList light={light} onSetLight={setLight} />
+      <SelectModeDropdownList
+        light={state.light}
+        onSetLight={(v) => dispatch({ type: "SET_LIGHT", payload: v })}
+      />
       <Modal
-        isOpen={showForgetPasswordModal}
-        onSetIsOpen={setShowForgetPasswordModal}
+        isOpen={state.showForgetPasswordModal}
+        onSetIsOpen={(v) => dispatch({ type: "SET_MODAL", payload: v })}
       />
 
-      <div className="flex justify-center items-center">
+      <div
+        className={`flex justify-center items-center ${
+          state.showForgetPasswordModal ? "pointer-events-none" : ""
+        }`}
+      >
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -79,12 +161,16 @@ function LoginForm() {
             <input
               type="text"
               className="border-1 border-gray-300 bg-gray-50 rounded-xl flex-1 px-3 py-2 focus:outline-0 dark:text-slate-900"
-              onChange={(e) => setUsername(e.target.value)}
-              value={username}
               placeholder="your@email.com"
+              value={state.username}
+              onChange={(e) =>
+                dispatch({ type: "SET_USERNAME", payload: e.target.value })
+              }
             />
-            {usernameError && (
-              <p className="text-red-500 text-sm pl-3">{usenameErrorMessage}</p>
+            {state.usernameError && (
+              <p className="text-red-500 text-sm pl-3">
+                {state.usernameErrorMessage}
+              </p>
             )}
           </div>
           <div className="flex flex-col space-y-1 space-x-2">
@@ -92,13 +178,15 @@ function LoginForm() {
             <input
               type="password"
               className="border-1 border-gray-300 bg-gray-50 rounded-xl px-3 py-2 focus:outline-0 dark:text-slate-900"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={state.password}
+              onChange={(e) =>
+                dispatch({ type: "SET_PASSWORD", payload: e.target.value })
+              }
               placeholder="••••••"
             />
-            {passwordError && (
+            {state.passwordError && (
               <p className="text-red-500 text-sm pl-3">
-                {passwordErrorMessage}
+                {state.passwordErrorMessage}
               </p>
             )}
           </div>
@@ -110,13 +198,19 @@ function LoginForm() {
             <button
               type="submit"
               className="bg-blue-400 text-white w-full rounded-xl py-2 hover:opacity-80 transition delay-50 duration-300 ease-in-out cursor-pointer dark:bg-white dark:text-slate-900"
-              onClick={handleSubmit}
+              onClick={() => handleSubmit(state, dispatch)}
             >
               Sign in
             </button>
             <button
+              type="button"
               className="underline underline-offset-4 decoration-gray-300 cursor-pointer text-sm hover:opacity-60"
-              onClick={() => setShowForgetPasswordModal(true)}
+              onClick={(e) =>
+                dispatch({
+                  type: "SET_MODAL",
+                  payload: true
+                })
+              }
             >
               Forgot your password?
             </button>

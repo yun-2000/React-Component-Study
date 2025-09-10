@@ -1,8 +1,8 @@
-export default function Modal({ isOpen, onSetIsOpen, errorMessage }) {
+export default function Modal({ isOpen, onSetIsOpen }) {
   return (
     isOpen && (
       <div className="fixed top-0 left-0 min-h-screen min-w-screen flex justify-center items-center">
-        <div className="w-130 bg-slate-50 flex flex-col space-y-5 py-8 px-10 rounded-md shadow-md focus:-outline-offset-8">
+        <div className="w-130 bg-slate-50 flex flex-col space-y-5 py-8 px-10 rounded-md shadow-md">
           <label>
             Enter your account's email address, and we'll send you a link to
             reset your password.
